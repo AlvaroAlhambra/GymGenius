@@ -1,4 +1,4 @@
-package com.example.gymgenius.ui.home;
+package com.example.gymgenius.ui.training;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

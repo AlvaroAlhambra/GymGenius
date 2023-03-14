@@ -1,4 +1,4 @@
-package com.example.gymgenius.ui.slideshow;
+package com.example.gymgenius.ui.account;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_training">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.example.gymgenius.ui.home.HomeFragment"
-        android:label="@string/menu_home"
+        android:id="@+id/nav_training"
+        android:name="com.example.gymgenius.ui.training.HomeFragment"
+        android:label="@string/menu_training"
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.example.gymgenius.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
+        android:id="@+id/nav_diet"
+        android:name="com.example.gymgenius.ui.diet.GalleryFragment"
+        android:label="@string/menu_diet"
         tools:layout="@layout/fragment_gallery" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.example.gymgenius.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
+        android:id="@+id/nav_account"
+        android:name="com.example.gymgenius.ui.account.SlideshowFragment"
+        android:label="@string/menu_account"
         tools:layout="@layout/fragment_slideshow" />
 </navigation>
