@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "869208834109",
+    "firebase_url": "https://gymgenius-9a3e2-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "gymgenius-9a3e2",
+    "storage_bucket": "gymgenius-9a3e2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:869208834109:android:a509b8892cc55b58d3ea54",
+        "android_client_info": {
+          "package_name": "com.example.gymgenius"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "869208834109-phlseq882fgnjgoenc6cgko1olffq935.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsjajGuyfpxss0b0NvzZzAiJum0cdXLoQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "869208834109-e8v2m6trmu4jire1ash0gt5mhmuebg1p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
