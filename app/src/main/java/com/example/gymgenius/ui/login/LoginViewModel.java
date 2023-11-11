@@ -1,70 +1,59 @@
 package com.example.gymgenius.ui.login;
 
-import androidx.lifecycle.LiveData;
+import android.widget.Toast;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
-import android.util.Patterns;
-
-import com.example.gymgenius.data.LoginRepository;
-import com.example.gymgenius.data.Result;
-import com.example.gymgenius.data.model.LoggedInUser;
-import com.example.gymgenius.R;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.example.gymgenius.ui.login.LoginView;
 
 public class LoginViewModel extends ViewModel {
+    private final MutableLiveData<Boolean> loginSuccess = new MutableLiveData<>();
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<String> userEmail = new MutableLiveData<>();
 
-    private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
-    private LoginRepository loginRepository;
-
-    LoginViewModel(LoginRepository loginRepository) {
-        this.loginRepository = loginRepository;
+    public MutableLiveData<Boolean> getLoginSuccess() {
+        return loginSuccess;
     }
 
-    LiveData<LoginFormState> getLoginFormState() {
-        return loginFormState;
+    public MutableLiveData<String> getErrorMessage() {
+        return errorMessage;
     }
 
-    LiveData<LoginResult> getLoginResult() {
-        return loginResult;
+    public MutableLiveData<String> getUserEmail() {
+        return userEmail;
     }
 
-    public void login(String username, String password) {
-        // can be launched in a separate asynchronous job
-        Result<LoggedInUser> result = loginRepository.login(username, password);
+    public void createUserWithEmailAndPassword(String email, String password) {
+        try {
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> handleAuthenticationResult(task));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-        if (result instanceof Result.Success) {
-            LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-            loginResult.setValue(new LoginResult(new LoggedInUserView(data.getDisplayName())));
+    public void signInWithEmailAndPassword(String email, String password) {
+        try {
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> handleAuthenticationResult(task));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleAuthenticationResult(Task<AuthResult> task) {
+        if (task.isSuccessful()) {
+            loginSuccess.setValue(true);
+            // Obtén el correo electrónico y actualiza el LiveData
+            String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            userEmail.setValue(email);
         } else {
-            loginResult.setValue(new LoginResult(R.string.login_failed));
+            loginSuccess.setValue(false);
+            errorMessage.setValue(task.getException().getMessage());
         }
-    }
-
-    public void loginDataChanged(String username, String password) {
-        if (!isUserNameValid(username)) {
-            loginFormState.setValue(new LoginFormState(R.string.invalid_username, null));
-        } else if (!isPasswordValid(password)) {
-            loginFormState.setValue(new LoginFormState(null, R.string.invalid_password));
-        } else {
-            loginFormState.setValue(new LoginFormState(true));
-        }
-    }
-
-    // A placeholder username validation check
-    private boolean isUserNameValid(String username) {
-        if (username == null) {
-            return false;
-        }
-        if (username.contains("@")) {
-            return Patterns.EMAIL_ADDRESS.matcher(username).matches();
-        } else {
-            return !username.trim().isEmpty();
-        }
-    }
-
-    // A placeholder password validation check
-    private boolean isPasswordValid(String password) {
-        return password != null && password.trim().length() > 5;
     }
 }
+

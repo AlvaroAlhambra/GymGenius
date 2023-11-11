@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -24,20 +25,14 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-    private SharedPreferences preferences;
     //private String lastScreen; // Almacena el tag del último fragmento
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //Poner correo debajo del nombre corporativo
-        //final TextView userEmail = binding.navView.findViewById(R.id.user_txt);
-
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE); // Inicializa las preferencias compartidas
 
         setSupportActionBar(binding.appBarMain.toolbar);
         binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
@@ -49,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         });
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+
+        startPreferences(navigationView);
 
         // Configura el menú "Log Out"
         Menu menu = navigationView.getMenu();
@@ -163,4 +160,22 @@ public class MainActivity extends AppCompatActivity {
         String currentFragmentTag = navController.getCurrentDestination().getLabel().toString();
         preferences.edit().putString("last_screen", currentFragmentTag).apply();
     }*/
+
+    private void startPreferences(NavigationView navigationView){
+        SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+
+        // Obtén el correo electrónico del usuario después de iniciar sesión
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+
+        //Cambiar correo en el NAV HEADER
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("user_email", userEmail);
+        editor.apply();
+
+        // Actualiza el TextView en el encabezado de navegación
+        View headerView = navigationView.getHeaderView(0); // Asegúrate de tener el índice correcto si tienes múltiples encabezados
+        TextView navSubtitle = headerView.findViewById(R.id.user_txt);
+        navSubtitle.setText(userEmail);
+
+    }
 }

@@ -1,5 +1,4 @@
-package com.example.gymgenius.ui.account;
-
+package com.example.gymgenius.ui.diet;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,23 +10,25 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.gymgenius.databinding.FragmentAccountBinding;
+import com.example.gymgenius.databinding.FragmentDietBinding;
 
-public class AccountFragment extends Fragment {
+public class DietView extends Fragment {
 
-    private FragmentAccountBinding binding;
-    private SharedPreferences preferences; // Inicializa esto en onCreateView
+    private FragmentDietBinding binding;
+    private SharedPreferences preferences;
+    private DietViewModel dietViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        AccountViewModel accountViewModel =
-                new ViewModelProvider(this).get(AccountViewModel.class);
+        dietViewModel = new ViewModelProvider(this).get(DietViewModel.class);
 
-        binding = FragmentAccountBinding.inflate(inflater, container, false);
+        binding = FragmentDietBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textSlideshow;
-        accountViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textGallery;
+
+        // Observa el texto en el ViewModel y actualiza la interfaz de usuario
+        dietViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         // Inicializa preferences en onCreateView
         preferences = requireActivity().getSharedPreferences("MyPrefs", requireActivity().MODE_PRIVATE);

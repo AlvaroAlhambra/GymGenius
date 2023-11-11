@@ -1,4 +1,4 @@
-package com.example.gymgenius.ui.diet;
+package com.example.gymgenius.ui.training;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,23 +11,25 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.gymgenius.databinding.FragmentDietBinding;
+import com.example.gymgenius.databinding.FragmentTrainingBinding;
 
-public class DietFragment extends Fragment {
+public class TrainingView extends Fragment {
 
-    private FragmentDietBinding binding;
-    private SharedPreferences preferences; // Inicializa esto en onCreateView
+    private FragmentTrainingBinding binding;
+    private SharedPreferences preferences;
+    private TrainingViewModel trainingViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        DietViewModel dietViewModel =
-                new ViewModelProvider(this).get(DietViewModel.class);
+        trainingViewModel = new ViewModelProvider(this).get(TrainingViewModel.class);
 
-        binding = FragmentDietBinding.inflate(inflater, container, false);
+        binding = FragmentTrainingBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textGallery;
-        dietViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textHome;
+
+        // Observa el texto en el ViewModel y actualiza la interfaz de usuario
+        trainingViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         // Inicializa preferences en onCreateView
         preferences = requireActivity().getSharedPreferences("MyPrefs", requireActivity().MODE_PRIVATE);

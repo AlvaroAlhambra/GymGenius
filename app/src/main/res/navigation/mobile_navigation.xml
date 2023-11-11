@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/nav_training"
-        android:name="com.example.gymgenius.ui.training.TrainingFragment"
+        android:name="com.example.gymgenius.ui.training.TrainingView"
         android:label="@string/menu_training"
         tools:layout="@layout/fragment_training" />
 
     <fragment
         android:id="@+id/nav_diet"
-        android:name="com.example.gymgenius.ui.diet.DietFragment"
+        android:name="com.example.gymgenius.ui.diet.DietView"
         android:label="@string/menu_diet"
         tools:layout="@layout/fragment_diet" />
 
     <fragment
         android:id="@+id/nav_account"
-        android:name="com.example.gymgenius.ui.account.AccountFragment"
+        android:name="com.example.gymgenius.ui.account.AccountView"
         android:label="@string/menu_account"
         tools:layout="@layout/fragment_account" />
 </navigation>

@@ -1,4 +1,4 @@
-package com.example.gymgenius.ui.training;
+package com.example.gymgenius.ui.account;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,25 +11,26 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.gymgenius.databinding.FragmentTrainingBinding;
+import com.example.gymgenius.R; // Asegúrate de que esta referencia sea correcta según tu proyecto
+import com.example.gymgenius.databinding.FragmentAccountBinding;
 
-public class TrainingFragment extends Fragment {
+public class AccountView extends Fragment {
 
-    private FragmentTrainingBinding binding;
+    private FragmentAccountBinding binding;
     private SharedPreferences preferences;
+    private AccountViewModel accountViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        TrainingViewModel trainingViewModel =
-                new ViewModelProvider(this).get(TrainingViewModel.class);
+        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
 
-        binding = FragmentTrainingBinding.inflate(inflater, container, false);
+        binding = FragmentAccountBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textHome;
-        trainingViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textSlideshow;
+        // Actualiza la interfaz de usuario con el nombre de usuario
+        textView.setText("Welcome, " + accountViewModel.getUserEmail());
 
-        // Inicializa preferences en onCreateView
         preferences = requireActivity().getSharedPreferences("MyPrefs", requireActivity().MODE_PRIVATE);
 
         return root;
@@ -38,8 +39,6 @@ public class TrainingFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        // Actualizar el valor de lastScreen antes de cambiar de fragmento
         String currentFragmentTag = this.getClass().getSimpleName();
         preferences.edit().putString("last_screen", currentFragmentTag).apply();
     }
