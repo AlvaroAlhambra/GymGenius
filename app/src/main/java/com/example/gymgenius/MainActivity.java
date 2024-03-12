@@ -1,31 +1,37 @@
 package com.example.gymgenius;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
+
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
 import android.widget.TextView;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.navigation.NavigationView;
-
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.gymgenius.databinding.ActivityMainBinding;
+import com.example.gymgenius.ui.training.TrainingViewModel;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-    //private String lastScreen; // Almacena el tag del último fragmento
+    private TrainingViewModel trainingViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,16 +44,20 @@ public class MainActivity extends AppCompatActivity {
         binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // Al hacer clic en el botón flotante
             }
         });
+
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
 
-        startPreferences(navigationView);
+        /*//QUITAR DE AQUI EL LLAMAR AL STARTPREFERENCES
+        // Obtén una instancia del TrainingViewModel
+        trainingViewModel = new ViewModelProvider(this).get(TrainingViewModel.class);
 
-        // Configura el menú "Log Out"
+        // Llama al método startPreferences() del TrainingViewModel
+        trainingViewModel.startPreferences(findViewById(R.id.nav_view)); // Ajusta el ID según tu layout
+*/
         Menu menu = navigationView.getMenu();
         MenuItem logOutMenuItem = menu.findItem(R.id.nav_logout);
         logOutMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -58,8 +68,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_training, R.id.nav_diet, R.id.nav_account)
                 .setOpenableLayout(drawer)
@@ -67,6 +75,34 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                || super.onSupportNavigateUp();
+    }
+
+    public void logOut() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("LOGOUT");
+        builder.setMessage("Are you sure you want to logout?");
+        builder.setPositiveButton("Yes", (dialog, which) -> {
+            FirebaseAuth.getInstance().signOut();
+            finish();
+        });
+
+        builder.setNegativeButton("No", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+}
 
 
 
@@ -83,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             showFragmentByTag("Training");
         }*/
-    }
+
 
     // Método para mostrar un fragmento por su tag
     /*private void showFragmentByTag(String tag) {
@@ -116,41 +152,8 @@ public class MainActivity extends AppCompatActivity {
         outState.putString("lastScreen", lastScreen);
     }*/
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
-    }
 
-    // Método para cerrar sesión
-    public void logOut() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("LOGOUT");
-        builder.setMessage("Are you sure you want to logout?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                FirebaseAuth.getInstance().signOut();
-                finish();
-            }
-        });
-
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.show();
-    }
     /*@Override
     protected void onStop() {
         super.onStop();
@@ -160,22 +163,3 @@ public class MainActivity extends AppCompatActivity {
         String currentFragmentTag = navController.getCurrentDestination().getLabel().toString();
         preferences.edit().putString("last_screen", currentFragmentTag).apply();
     }*/
-
-    private void startPreferences(NavigationView navigationView){
-        SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-
-        // Obtén el correo electrónico del usuario después de iniciar sesión
-        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-
-        //Cambiar correo en el NAV HEADER
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("user_email", userEmail);
-        editor.apply();
-
-        // Actualiza el TextView en el encabezado de navegación
-        View headerView = navigationView.getHeaderView(0); // Asegúrate de tener el índice correcto si tienes múltiples encabezados
-        TextView navSubtitle = headerView.findViewById(R.id.user_txt);
-        navSubtitle.setText(userEmail);
-
-    }
-}

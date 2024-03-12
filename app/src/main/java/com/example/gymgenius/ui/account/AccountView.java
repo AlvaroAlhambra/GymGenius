@@ -19,7 +19,33 @@ public class AccountView extends Fragment {
     private FragmentAccountBinding binding;
     private SharedPreferences preferences;
     private AccountViewModel accountViewModel;
+    private String name;
+    private String email;
 
+    public AccountView() {
+    }
+
+    // Constructor con parámetros
+    public AccountView(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
+    // Getters y setters
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
