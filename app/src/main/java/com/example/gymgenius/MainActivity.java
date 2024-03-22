@@ -51,13 +51,6 @@ public class MainActivity extends AppCompatActivity {
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
 
-        /*//QUITAR DE AQUI EL LLAMAR AL STARTPREFERENCES
-        // Obtén una instancia del TrainingViewModel
-        trainingViewModel = new ViewModelProvider(this).get(TrainingViewModel.class);
-
-        // Llama al método startPreferences() del TrainingViewModel
-        trainingViewModel.startPreferences(findViewById(R.id.nav_view)); // Ajusta el ID según tu layout
-*/
         Menu menu = navigationView.getMenu();
         MenuItem logOutMenuItem = menu.findItem(R.id.nav_logout);
         logOutMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {

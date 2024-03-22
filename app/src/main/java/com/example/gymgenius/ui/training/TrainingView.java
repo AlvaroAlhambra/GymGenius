@@ -2,61 +2,115 @@ package com.example.gymgenius.ui.training;
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CalendarView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.gymgenius.R;
 import com.example.gymgenius.databinding.FragmentTrainingBinding;
+import com.example.gymgenius.ui.training.fragments.SelectedDateFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class TrainingView extends Fragment {
 
-    private FragmentTrainingBinding binding;
     private SharedPreferences preferences;
+    private CalendarView calendarView;
     private TrainingViewModel trainingViewModel;
+    private FragmentTrainingBinding binding;
 
+    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        // Inicializar el ViewModel
         trainingViewModel = new ViewModelProvider(this).get(TrainingViewModel.class);
 
+        // Inflar el layout del fragmento y obtener la referencia a la vista raíz
         binding = FragmentTrainingBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Obtener la referencia al TextView del layout
         final TextView textView = binding.textHome;
 
-        // Observa el texto en el ViewModel y actualiza la interfaz de usuario
+        // Observar los cambios en el texto del ViewModel y actualizar la interfaz de usuario
         trainingViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
-        // Inicializa preferences en onCreateView
+        // Inicializar las preferencias compartidas en onCreateView
         preferences = requireActivity().getSharedPreferences("MyPrefs",
                 requireActivity().MODE_PRIVATE);
 
         // Verificar si es un usuario nuevo y guardar los datos en Firebase
         checkAndSaveUserData();
 
+        // Obtener la referencia al CalendarView del layout
+        calendarView = root.findViewById(R.id.calendarView);
+
+        // Establecer un listener para el evento de cambio de fecha del CalendarView
+        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+            // Formatear la fecha seleccionada
+            String selectedDate = String.format(Locale.getDefault(), "%04d/%02d/%02d", year, (month + 1), dayOfMonth);
+
+            // Obtener el ID del usuario actual (asegúrate de tener esta información disponible)
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+            // Guardar la fecha seleccionada en Firebase
+            saveDate(userId, selectedDate);
+        });
+
         return root;
     }
 
+
+
+
+    /*public void onSaveDateClicked(String selectedDate) {
+        // Aquí puedes agregar la lógica para guardar la fecha en Firebase
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("selected_date", selectedDate);
+
+        db.collection("USERS").document(userId)
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("TrainingView", "Fecha guardada en Firebase: " + selectedDate);
+                    Toast.makeText(getContext(), "Fecha guardada exitosamente", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("TrainingView", "Error al guardar la fecha en Firebase", e);
+                    Toast.makeText(getContext(), "Error al guardar la fecha en Firebase", Toast.LENGTH_SHORT).show();
+                });
+    }
+*/
     @Override
     public void onDestroyView() {
         super.onDestroyView();
 
         // Actualizar el valor de lastScreen antes de cambiar de fragmento
+        preferences = requireActivity().getSharedPreferences("my_preferences", Context.MODE_PRIVATE);
         String currentFragmentTag = this.getClass().getSimpleName();
         preferences.edit().putString("last_screen", currentFragmentTag).apply();
     }
@@ -156,6 +210,39 @@ public class TrainingView extends Fragment {
                     // Manejar el error al crear la jerarquía en Firestore
                     Log.e("errorJerarquia",
                             "Error al crear la jerarquía para el usuario: " + userId, e);
+                });
+    }
+    private void saveDate(String userId, String selectedDate) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Verificar si la fecha ya existe en Firebase
+        db.collection("USERS").document(userId).collection("Dates").document(selectedDate)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // La fecha ya existe, no es necesario guardarla nuevamente
+                        Log.d(TAG, "La fecha ya existe en Firebase: " + selectedDate);
+                    } else {
+                        // La fecha no existe, guardarla en Firebase
+                        Map<String, Object> data = new HashMap<>();
+
+                        // Agregar o actualizar el subdocumento de la fecha en la colección de fechas del usuario
+                        db.collection("USERS").document(userId).collection("Dates")
+                                .document(selectedDate) // Utiliza la fecha seleccionada como el nombre del documento
+                                .set(data)
+                                .addOnSuccessListener(aVoid -> {
+                                    // Éxito al guardar los datos en Firestore
+                                    Log.d(TAG, "Fecha guardada en Firebase: " + selectedDate);
+                                })
+                                .addOnFailureListener(e -> {
+                                    // Manejar el error al guardar los datos en Firestore
+                                    Log.e(TAG, "Error al guardar la fecha en Firebase: " + selectedDate, e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Manejar el error al verificar la existencia de la fecha en Firebase
+                    Log.e(TAG, "Error al verificar la existencia de la fecha en Firebase: " + selectedDate, e);
                 });
     }
 }
