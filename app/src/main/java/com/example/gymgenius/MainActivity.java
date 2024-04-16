@@ -1,37 +1,30 @@
 package com.example.gymgenius;
 
-import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
-
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Menu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.gymgenius.databinding.ActivityMainBinding;
-import com.example.gymgenius.ui.training.TrainingViewModel;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-    private TrainingViewModel trainingViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,16 +34,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.appBarMain.toolbar);
-        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Al hacer clic en el botón flotante
-            }
+        binding.appBarMain.fab.setOnClickListener(view -> {
+            Toast.makeText(this, "ME TOCASTE", Toast.LENGTH_SHORT).show();
         });
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
 
+        // Inicializar preferencias para mostrar el correo electrónico debajo del logo de la APP
+        startPreferences(navigationView);
+
+        //Configuracion del LogOut
         Menu menu = navigationView.getMenu();
         MenuItem logOutMenuItem = menu.findItem(R.id.nav_logout);
         logOutMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -61,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Configurar menú lateral y navegación
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_training, R.id.nav_diet, R.id.nav_account)
                 .setOpenableLayout(drawer)
@@ -68,6 +63,11 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        // Puntos de control para verificar la navegación entre fragmentos
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            Log.d("alvaro", "Fragment changed to: " + destination.getLabel());
+        });
     }
 
     @Override
@@ -95,64 +95,21 @@ public class MainActivity extends AppCompatActivity {
         builder.setNegativeButton("No", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
+
+    private void startPreferences(NavigationView navigationView){
+        SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+
+        // Obtén el correo electrónico del usuario después de iniciar sesión
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+
+        //Cambiar correo en el NAV HEADER
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("user_email", userEmail);
+        editor.apply();
+
+        // Actualiza el TextView en el encabezado de navegación
+        View headerView = navigationView.getHeaderView(0); // Asegúrate de tener el índice correcto si tienes múltiples encabezados
+        TextView navSubtitle = headerView.findViewById(R.id.user_txt);
+        navSubtitle.setText(userEmail);
+    }
 }
-
-
-
-        /*// Recuperar el último fragmento visitado desde SharedPreferences o el estado guardado
-        if (savedInstanceState != null) {
-            lastScreen = savedInstanceState.getString("lastScreen");
-        } else {
-            lastScreen = preferences.getString("last_screen", null);
-        }
-
-        // Mostrar el fragmento correspondiente al último visitado o por defecto el fragmento de Training
-        if (lastScreen != null) {
-            showFragmentByTag(lastScreen);
-        } else {
-            showFragmentByTag("Training");
-        }*/
-
-
-    // Método para mostrar un fragmento por su tag
-    /*private void showFragmentByTag(String tag) {
-        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_main);
-
-        if (currentFragment == null || !currentFragment.getClass().getSimpleName().equals(tag + "Fragment")) {
-            Fragment fragmentToShow = null;
-
-            if (tag.equals("Account")) {
-                fragmentToShow = new AccountFragment();
-            } else if (tag.equals("Diet")) {
-                fragmentToShow = new DietFragment();
-            } else if (tag.equals("Training")) {
-                fragmentToShow = new TrainingFragment();
-            }
-
-            if (fragmentToShow != null) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment_content_main, fragmentToShow)
-                        .commit();
-            }
-        }
-    }*/
-
-  /*  @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        // Guarda el último fragmento visitado en el estado de la actividad
-        outState.putString("lastScreen", lastScreen);
-    }*/
-
-
-
-    /*@Override
-    protected void onStop() {
-        super.onStop();
-
-        // Actualizar y guardar la última pantalla visitada en SharedPreferences
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        String currentFragmentTag = navController.getCurrentDestination().getLabel().toString();
-        preferences.edit().putString("last_screen", currentFragmentTag).apply();
-    }*/
